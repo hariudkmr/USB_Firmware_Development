@@ -18,11 +18,13 @@
  */
 
 #include "logger.h"
+#include "usb_framework.h"
 
 
 int main(void)
 {
 	log_info("Program Entry-Point");
+	usbd_initialize();
     /* Loop forever */
 	for(;;);
 }
