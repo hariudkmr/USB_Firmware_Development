@@ -27,27 +27,27 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000030  00000000  00000000  00020068  2**0
                   CONTENTS, READONLY
- 12 .debug_info   00001c6c  00000000  00000000  00020098  2**0
+ 12 .debug_info   0000202a  00000000  00000000  00020098  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 0000069a  00000000  00000000  00021d04  2**0
+ 13 .debug_abbrev 000007db  00000000  00000000  000220c2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000128  00000000  00000000  000223a0  2**3
+ 14 .debug_aranges 00000188  00000000  00000000  000228a0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 000000d0  00000000  00000000  000224c8  2**3
+ 15 .debug_ranges 00000130  00000000  00000000  00022a28  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00019416  00000000  00000000  00022598  2**0
+ 16 .debug_macro  0001942a  00000000  00000000  00022b58  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00001c98  00000000  00000000  0003b9ae  2**0
+ 17 .debug_line   00001f05  00000000  00000000  0003bf82  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0008c3c0  00000000  00000000  0003d646  2**0
+ 18 .debug_str    0008c624  00000000  00000000  0003de87  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  000c9a06  2**0
+ 19 .comment      00000053  00000000  00000000  000ca4ab  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000c0c  00000000  00000000  000c9a5c  2**2
+ 20 .debug_frame  00000dd0  00000000  00000000  000ca500  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .stab         00000084  00000000  00000000  000ca668  2**2
+ 21 .stab         00000084  00000000  00000000  000cb2d0  2**2
                   CONTENTS, READONLY, DEBUGGING
- 22 .stabstr      00000117  00000000  00000000  000ca6ec  2**0
+ 22 .stabstr      00000117  00000000  00000000  000cb354  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -517,9 +517,9 @@ void SystemInit(void)
  80004aa:	bd80      	pop	{r7, pc}
 
 080004ac <initialize_gpio_pins>:
- */
-
+#include "logger.h"
 #include "usb_driver.h"
+#include "usb_standards.h"
 
 void initialize_gpio_pins()
 {
