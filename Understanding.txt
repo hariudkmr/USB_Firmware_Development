@@ -3,3 +3,10 @@ Receive Event and Read the packet
 	 The interrupt handler calls the Framework, to Read the Received packet
 	 The Framework inturn call the driver function "read packet"
 	 Note for all the Out Point we have only one RX FIFO, hence the it is read from FIFO 0
+	 
+correct usb cable need for enumeration
+
+List of Debug option
+	1. sudo tail -f /var/log/syslog
+	2. lsusb
+	3. cat /sys/kernel/debug/usb/devices

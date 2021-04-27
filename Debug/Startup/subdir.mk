@@ -16,5 +16,5 @@ S_DEPS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 Startup/startup_stm32f407vgtx.o: ../Startup/startup_stm32f407vgtx.s Startup/subdir.mk
-	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -c -I"D:/Learning/USB_Firmware_Development/Inc/CMSIS/Device/ST/STM32F4xx/Include" -I"D:/Learning/USB_Firmware_Development/Inc/CMSIS/Include" -x assembler-with-cpp -MMD -MP -MF"Startup/startup_stm32f407vgtx.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
+	arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -c -I"/home/hari/STM32CubeIDE/workspace_1.6.1/USB_Project/Inc/CMSIS/Device/ST/STM32F4xx/Include" -I"/home/hari/STM32CubeIDE/workspace_1.6.1/USB_Project/Inc/CMSIS/Include" -x assembler-with-cpp -MMD -MP -MF"Startup/startup_stm32f407vgtx.d" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@" "$<"
 

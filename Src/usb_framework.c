@@ -26,10 +26,6 @@ static void process_standard_device_request()
 {
 	UsbRequest const *request = usbd_handle->ptr_out_buffer;
 
-	switch(request->bRequest)
-	{
-
-	}
 }
 
 static void process_request(){
@@ -71,6 +67,9 @@ static void usb_reset_received_handler()
 static void setup_data_received_handler(uint8_t endpointnumber, uint16_t byte_count){
 
 	usb_driver.read_packet(usbd_handle->ptr_out_buffer, byte_count);
+
+	// Prints out the received data.
+	log_debug_array("SETUP data: ", usbd_handle->ptr_out_buffer,byte_count);
 	process_request();
 
 }
