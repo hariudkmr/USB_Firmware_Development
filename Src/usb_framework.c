@@ -22,7 +22,34 @@ void usbd_initialize(UsbDevice *usb_device){
 
 }
 
+static void process_standard_device_request()
+{
+	UsbRequest const *request = usbd_handle->ptr_out_buffer;
+
+	switch(request->bRequest)
+	{
+
+	}
+}
+
 static void process_request(){
+
+	UsbRequest const *request = usbd_handle->ptr_out_buffer;
+
+	switch(request->bmRequestType & (USB_BM_REQUEST_TYPE_TYPE_MASK | USB_BM_REQUEST_TYPE_RECIPIENT_MASK))
+	{
+		case USB_BM_REQUEST_TYPE_TYPE_STANDARD | USB_BM_REQUEST_TYPE_RECIPIENT_DEVICE:
+			process_standard_device_request();
+		break;
+
+		case USB_BM_REQUEST_TYPE_TYPE_CLASS | USB_BM_REQUEST_TYPE_RECIPIENT_INTERFACE:
+			//process_class_interface_request();
+		break;
+
+		case USB_BM_REQUEST_TYPE_TYPE_STANDARD | USB_BM_REQUEST_TYPE_RECIPIENT_INTERFACE:
+			//process_standard_interface_request();
+		break;
+	}
 
 }
 
