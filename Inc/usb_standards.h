@@ -74,6 +74,22 @@ typedef struct
 #define USB_BM_REQUEST_TYPE_RECIPIENT_OTHER (3 << 0)
 /**@}*/
 
+/** \name USB standard request
+ *
+ * @{ */
+#define USB_STANDARD_GET_STATUS	0x0 /**<\brief Returns the status if the specified recipient */
+#define USB_STANDARD_CLEAR_FEATURE 0x01 /**<\brief Clears or Disables specific feature */
+#define USB_STANDARD_SET_FEATURE 0x03 /**<\brief Sets or Enables specific feature */
+#define USB_STANDARD_SET_ADDRESS 0x05 /**<\brief Sets the device address for all future device communication */
+#define USB_STANDARD_GET_DESCRIPTOR 0x06 /**<\brief Returns the specified descriptor  */
+#define USB_STANDARD_SET_DESCRIPTOR	0x07 /**<\brief updates existing descriptor or new descriptor to the device */
+#define USB_STANDARD_GET_CONFIG 0x08 /**<\brief returns  the current device configuration */
+#define USB_STANDARD_SET_CONFIG 0x09 /**<\brief sets the device configuration  */
+#define USB_STANDARD_GET_INTERFACE 0x0A /**<\brief  */
+#define USB_STANDARD_SET_INTERFACE 0x0B /**<\brief  */
+#define USB_STANDARD_SYNCH_FRAME 0x0C /**<\brief  */
+/**@}*/
+
 /** \name USB standard descriptor types
  * @{ */
 #define USB_DESCRIPTOR_TYPE_DEVICE 0x01

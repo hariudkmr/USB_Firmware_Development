@@ -8,7 +8,7 @@
 #include "usb_framework.h"
 #include "usb_driver.h"
 #include "usb_device.h"
-
+#include "usb_description.h"
 
 static UsbDevice *usbd_handle;
 
@@ -25,6 +25,27 @@ void usbd_initialize(UsbDevice *usb_device){
 static void process_standard_device_request()
 {
 	UsbRequest const *request = usbd_handle->ptr_out_buffer;
+
+	switch(request->bRequest)
+	{
+		case USB_STANDARD_GET_DESCRIPTOR:
+			log_info("Standard Get Descriptor request Received.");
+			const uint8_t descriptor_type = request->wValue >> 8;
+			const uint16_t descriptor_length = request->wLength;
+
+			switch(descriptor_type)
+			{
+			case USB_DESCRIPTOR_TYPE_DEVICE:
+				log_info(" Get Device Descriptor");
+				usbd_handle->ptr_in_buffer = &device_descriptor;
+				usbd_handle->in_data_size = descriptor_length;
+
+				log_info("Switching control state to IN Data");
+				usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_DATA_IN;
+				break;
+			}
+			break;
+	}
 
 }
 
@@ -49,6 +70,18 @@ static void process_request(){
 
 }
 
+static void process_control_transfer_stage()
+{
+	switch(usbd_handle->control_transfer_stage)
+	{
+		case USB_CONTROL_STAGE_SETUP:
+			break;
+
+		case USB_CONTROL_STAGE_DATA_IN:
+			break;
+	}
+}
+
 void usbd_poll()
 {
 	usb_driver.poll();
@@ -64,6 +97,10 @@ static void usb_reset_received_handler()
 	usb_driver.set_device_address(0);
 }
 
+static void usb_polled_handler()
+{
+	process_control_transfer_stage();
+}
 static void setup_data_received_handler(uint8_t endpointnumber, uint16_t byte_count){
 
 	usb_driver.read_packet(usbd_handle->ptr_out_buffer, byte_count);
@@ -76,6 +113,7 @@ static void setup_data_received_handler(uint8_t endpointnumber, uint16_t byte_co
 
 const UsbEvents usb_events = {
 		.on_usb_reset_received = &usb_reset_received_handler,
-		.on_setup_data_received = &setup_data_received_handler
+		.on_setup_data_received = &setup_data_received_handler,
+		.on_usb_polled = &usb_polled_handler
 };
 

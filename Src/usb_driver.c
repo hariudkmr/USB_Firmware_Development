@@ -415,7 +415,7 @@ static void gintsts_handler()
 
 	}
 
-
+	usb_events.on_usb_polled();
 }
 
 const UsbDriver usb_driver = {

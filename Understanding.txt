@@ -14,3 +14,7 @@ List of Debug option
 __attribute__((__packed__)) --> compiler based preprocessor directive for structure padding, to improve system performance.
 
 Renaming variable shortcut --> alt+shift+r
+
+ a label can only be part of a statement and a declaration is not a statement
+   declaration below switch label --> causes error
+   can be resolved using a semicolon or any other executable statement

@@ -11,9 +11,9 @@
 #include "usb_standards.h"
 
 const UsbDeviceDescriptor device_descriptor = {
-		.blength 			= sizeof(UsbDeviceDescriptor),
-		.bDescription 		= USB_DESCRIPTOR_TYPE_DEVICE,
-		.bcdDevice 			= 0x200,
+		.bLength 			= sizeof(UsbDeviceDescriptor),
+		.bDescriptorType 		= USB_DESCRIPTOR_TYPE_DEVICE,
+		.bcdUSB 			= 0x200,
 		.bDeviceClass 		= USB_CLASS_PER_INTERFACE,
 		.bDeviceSubClass	= USB_SUBCLASS_NONE,
 		.bDeviceProtocol	= USB_PROTOCOL_NONE,
