@@ -1,6 +1,0 @@
-"Src/Helpers/logger.o"
-"Src/main.o"
-"Src/systeminit.o"
-"Src/usb_driver.o"
-"Src/usb_framework.o"
-"Startup/startup_stm32f407vgtx.o"
