@@ -9,6 +9,7 @@
 #define USB_FRAMEWORK_H_
 
 #include "usb_driver.h"
+#include "usb_standards.h"
 
 void usbd_initialize();
 void usbd_poll();

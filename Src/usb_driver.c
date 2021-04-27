@@ -88,6 +88,15 @@ static void disconnect()
 	SET_BIT(USB_OTG_FS_DEVICE->DIEPMSK, USB_OTG_DIEPMSK_XFRCM);
 }
 
+static void set_device_address(uint8_t address)
+{
+    MODIFY_REG(
+		USB_OTG_FS_DEVICE->DCFG,
+		USB_OTG_DCFG_DAD,
+		_VAL2FLD(USB_OTG_DCFG_DAD, address)
+	);
+}
+
 /** \brief Pops data from the RxFIFO and stores it in the buffer.
  * \param buffer Pointer to the buffer, in which the popped data will be stored.
  * \param size Count of bytes to be popped from the dedicated RxFIFO memory.
@@ -347,11 +356,18 @@ static void rxflvl_handler()
 	switch (pktsts)
 	{
 	case 0x06: // SETUP packet (includes data).
+		usb_events.on_setup_data_received(endpoint_number, bcnt);
+		break;
     case 0x02: // OUT packet (includes data).
     	// ToDo
 		break;
+
     case 0x04: // SETUP stage has completed.
+    	// Re-enables the transmission on the endpoint.
+		SET_BIT(OUT_ENDPOINT(endpoint_number)->DOEPCTL,
+		USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
     	break;
+
     case 0x03: // OUT transfer has completed.
     	break;
 	}
@@ -405,6 +421,7 @@ static void gintsts_handler()
 const UsbDriver usb_driver = {
 	.initialize_core = &initialize_core,
 	.initialize_gpio_pins = &initialize_gpio_pins,
+	.set_device_address = &set_device_address,
 	.connect = &connect,
 	.disconnect = &disconnect,
 	.flush_rxfifo = &flush_rxfifo,

@@ -1,0 +1,5 @@
+Receive Event and Read the packet
+1. Interrupt is triggerred at USB Module (that RX FIFO is Not Empty)
+	 The interrupt handler calls the Framework, to Read the Received packet
+	 The Framework inturn call the driver function "read packet"
+	 Note for all the Out Point we have only one RX FIFO, hence the it is read from FIFO 0
