@@ -12,3 +12,5 @@ List of Debug option
 	3. cat /sys/kernel/debug/usb/devices
 	
 __attribute__((__packed__)) --> compiler based preprocessor directive for structure padding, to improve system performance.
+
+Renaming variable shortcut --> alt+shift+r
