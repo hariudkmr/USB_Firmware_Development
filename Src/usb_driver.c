@@ -9,7 +9,7 @@
 #include "usb_driver.h"
 #include "usb_standards.h"
 
-void initialize_gpio_pins()
+static void initialize_gpio_pins()
 {
 	// Enables the clock for GPIOA.
 	SET_BIT(RCC->AHB1ENR, RCC_AHB1ENR_GPIOAEN);
@@ -27,7 +27,7 @@ void initialize_gpio_pins()
 	);
 }
 
-void initialize_core()
+static void initialize_core()
 {
 	// Enables the clock for USB core FullSpeed
 	SET_BIT(RCC->AHB2ENR, RCC_AHB2ENR_OTGFSEN);
@@ -64,7 +64,7 @@ void initialize_core()
 
 /** \brief Connects the USB device to the bus.
  */
-void connect()
+static void connect()
 {
 	// Powers the transceivers on.
     SET_BIT(USB_OTG_FS->GCCFG, USB_OTG_GCCFG_PWRDWN);
@@ -75,7 +75,7 @@ void connect()
 
 /** \brief Disconnects the USB device from the bus.
  */
-void disconnect()
+static void disconnect()
 {
 	// Disconnects the device from the bus.
 	SET_BIT(USB_OTG_FS_DEVICE->DCTL, USB_OTG_DCTL_SDIS);
@@ -87,6 +87,69 @@ void disconnect()
 	SET_BIT(USB_OTG_FS_DEVICE->DOEPMSK, USB_OTG_DOEPMSK_XFRCM);
 	SET_BIT(USB_OTG_FS_DEVICE->DIEPMSK, USB_OTG_DIEPMSK_XFRCM);
 }
+
+/** \brief Pops data from the RxFIFO and stores it in the buffer.
+ * \param buffer Pointer to the buffer, in which the popped data will be stored.
+ * \param size Count of bytes to be popped from the dedicated RxFIFO memory.
+ */
+static void read_packet(void *buffer, uint16_t size)
+{
+	// Note: There is only one RxFIFO.
+	uint32_t *fifo = FIFO(0);
+
+	for (; size >= 4; size -=4, buffer += 4)
+	{
+		// Pops one 32-bit word of data (until there is less than one word remaining).
+		uint32_t data = *fifo;
+		// Stores the data in the buffer.
+		*((uint32_t*)buffer) = data;
+	}
+
+	if (size > 0)
+	{
+		// Pops the last remaining bytes (which are less than one word).
+		uint32_t data = *fifo;
+
+		for(; size > 0; size--, buffer++, data >>= 8)
+		{
+			// Stores the data in the buffer with the correct alignment.
+			*((uint8_t*)buffer) = 0xFF & data;
+		}
+	}
+}
+
+/** \brief Pushes a packet into the TxFIFO of an IN endpoint.
+ * \param endpoint_number The number of the endpoint, to which the data will be written.
+ * \param buffer Pointer to the buffer contains the data to be written to the endpoint.
+ * \param size The size of data to be written in bytes.
+ */
+static void write_packet(uint8_t endpoint_number, void const *buffer, uint16_t size)
+{
+	uint32_t *fifo = FIFO(endpoint_number);
+	USB_OTG_INEndpointTypeDef *in_endpoint = IN_ENDPOINT(endpoint_number);
+
+	// Configures the transmission (1 packet that has `size` bytes).
+	MODIFY_REG(in_endpoint->DIEPTSIZ,
+		USB_OTG_DIEPTSIZ_PKTCNT | USB_OTG_DIEPTSIZ_XFRSIZ,
+		_VAL2FLD(USB_OTG_DIEPTSIZ_PKTCNT, 1) | _VAL2FLD(USB_OTG_DIEPTSIZ_XFRSIZ, size)
+	);
+
+	// Enables the transmission after clearing both STALL and NAK of the endpoint.
+	MODIFY_REG(in_endpoint->DIEPCTL,
+		USB_OTG_DIEPCTL_STALL,
+		USB_OTG_DIEPCTL_CNAK | USB_OTG_DIEPCTL_EPENA
+	);
+
+	// Gets the size in term of 32-bit words (to avoid integer overflow in the loop).
+	size = (size + 3) / 4;
+
+	for (; size > 0; size--, buffer += 4)
+	{
+		// Pushes the data to the TxFIFO.
+		*fifo = *((uint32_t *)buffer);
+	}
+}
+
 
 /** \brief Updates the start addresses of all FIFOs according to the size of each FIFO.
  */
@@ -165,7 +228,7 @@ static void configure_txfifo_size(uint8_t endpoint_number, uint16_t size)
 
 /** \brief Flushes the RxFIFO of all OUT endpoints.
  */
-void flush_rxfifo()
+static void flush_rxfifo()
 {
 	SET_BIT(USB_OTG_FS->GRSTCTL, USB_OTG_GRSTCTL_RXFFLSH);
 }
@@ -173,7 +236,7 @@ void flush_rxfifo()
 /** \brief Flushes the TxFIFO of an IN endpoint.
  * \param endpoint_number The number of an IN endpoint to flush its TxFIFO.
  */
-void flush_txfifo(uint8_t endpoint_number)
+static void flush_txfifo(uint8_t endpoint_number)
 {
 	// Sets the number of the TxFIFO to be flushed and then triggers the flush.
 	MODIFY_REG(USB_OTG_FS->GRSTCTL,
@@ -182,7 +245,7 @@ void flush_txfifo(uint8_t endpoint_number)
 	);
 }
 
-void configure_endpoint0(uint8_t endpoint_size)
+static void configure_endpoint0(uint8_t endpoint_size)
 {
 	// Unmasks all interrupts of IN and OUT endpoint0.
 	SET_BIT(USB_OTG_FS_DEVICE->DAINTMSK, 1 << 0 | 1 << 16);
@@ -203,7 +266,7 @@ void configure_endpoint0(uint8_t endpoint_size)
 	configure_txfifo_size(0, endpoint_size);
 }
 
-void configure_in_endpoint(uint8_t endpoint_number, UsbEndpointType endpoint_type, uint16_t endpoint_size)
+static void configure_in_endpoint(uint8_t endpoint_number, UsbEndpointType endpoint_type, uint16_t endpoint_size)
 {
 	// Unmasks all interrupts of the targeted IN endpoint.
 	SET_BIT(USB_OTG_FS_DEVICE->DAINTMSK, 1 << endpoint_number);
@@ -222,7 +285,7 @@ void configure_in_endpoint(uint8_t endpoint_number, UsbEndpointType endpoint_typ
 /** \brief Deconfigures IN and OUT endpoints of a specific endpoint number.
  * \param endpoint_number The number of the IN and OUT endpoints to deconfigure.
  */
-void deconfigure_endpoint(uint8_t endpoint_number)
+static void deconfigure_endpoint(uint8_t endpoint_number)
 {
 	USB_OTG_INEndpointTypeDef *in_endpoint = IN_ENDPOINT(endpoint_number);
 	USB_OTG_OUTEndpointTypeDef *out_endpoint = OUT_ENDPOINT(endpoint_number);
@@ -263,7 +326,38 @@ void deconfigure_endpoint(uint8_t endpoint_number)
 	flush_rxfifo();
 }
 
-void usbrst_handler()
+static void enumdne_handler()
+{
+	log_info("USB device speed enumeration done.");
+	configure_endpoint0(8);
+}
+
+static void rxflvl_handler()
+{
+	 // Pops the status information word from the RxFIFO.
+	uint32_t receive_status = USB_OTG_FS_GLOBAL->GRXSTSP;
+
+	// The endpoint that received the data.
+	uint8_t endpoint_number = _FLD2VAL(USB_OTG_GRXSTSP_EPNUM, receive_status);
+	// The count of bytes in the received packet.
+	uint16_t bcnt = _FLD2VAL(USB_OTG_GRXSTSP_BCNT, receive_status);
+	// The status of the received packet.
+	uint16_t pktsts = _FLD2VAL(USB_OTG_GRXSTSP_PKTSTS, receive_status);
+
+	switch (pktsts)
+	{
+	case 0x06: // SETUP packet (includes data).
+    case 0x02: // OUT packet (includes data).
+    	// ToDo
+		break;
+    case 0x04: // SETUP stage has completed.
+    	break;
+    case 0x03: // OUT transfer has completed.
+    	break;
+	}
+}
+
+static void usbrst_handler()
 {
 	log_info("USB reset signal was detected");
 	for (uint8_t i = 0; i <= ENDPOINT_COUNT; i++)
@@ -273,7 +367,7 @@ void usbrst_handler()
 
 }
 
-void gintsts_handler()
+static void gintsts_handler()
 {
 	volatile uint32_t gintsts = USB_OTG_FS_GLOBAL->GINTSTS;
 
@@ -285,9 +379,15 @@ void gintsts_handler()
 	}
 	else if (gintsts & USB_OTG_GINTSTS_ENUMDNE)
 	{
+		enumdne_handler();
+		// Clears the interrupt.
+		SET_BIT(USB_OTG_FS_GLOBAL->GINTSTS, USB_OTG_GINTSTS_ENUMDNE);
 	}
 	else if (gintsts & USB_OTG_GINTSTS_RXFLVL)
 	{
+		rxflvl_handler();
+		// Clears the interrupt.
+		SET_BIT(USB_OTG_FS_GLOBAL->GINTSTS, USB_OTG_GINTSTS_RXFLVL);
 
 	}
 	else if (gintsts & USB_OTG_GINTSTS_IEPINT)
@@ -302,3 +402,15 @@ void gintsts_handler()
 
 }
 
+const UsbDriver usb_driver = {
+	.initialize_core = &initialize_core,
+	.initialize_gpio_pins = &initialize_gpio_pins,
+	.connect = &connect,
+	.disconnect = &disconnect,
+	.flush_rxfifo = &flush_rxfifo,
+	.flush_txfifo = &flush_txfifo,
+	.configure_in_endpoint = &configure_in_endpoint,
+	.read_packet = &read_packet,
+	.write_packet = &write_packet,
+	.poll = &gintsts_handler
+};

@@ -11,5 +11,6 @@
 #include "usb_driver.h"
 
 void usbd_initialize();
+void usbd_poll();
 
 #endif /* USB_FRAMEWORK_H_ */

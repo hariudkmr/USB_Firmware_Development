@@ -26,5 +26,8 @@ int main(void)
 	log_info("Program Entry-Point");
 	usbd_initialize();
     /* Loop forever */
-	for(;;);
+	for(;;)
+	{
+		usbd_poll();
+	}
 }

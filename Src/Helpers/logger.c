@@ -19,15 +19,17 @@ int _write(int file, char *ptr, int len)
 
 char const * const _get_log_level_string(LogLevel const log_level)
 {
-    switch(log_level)
+    char *ptr;
+	switch(log_level)
     {
         case LOG_LEVEL_ERROR:
-            return "ERROR";
+        	ptr = "ERROR";
         case LOG_LEVEL_INFORMATION:
-            return "INFO";
+        	ptr =  "INFO";
         case LOG_LEVEL_DEBUG:
-            return "DEBUG";
+        	ptr =  "DEBUG";
     }
+	return ptr;
 }
 
 static void _log(LogLevel const log_level, char const * const format, va_list args)
@@ -72,9 +74,10 @@ void log_debug(char const * const format, ...)
  */
 void log_debug_array(char const * const label, void const *array, uint16_t const len)
 {
-    if (LOG_LEVEL_DEBUG > system_log_level)
+    if (LOG_LEVEL_DEBUG > system_log_level){
         return;
-        
+    }
+
 	printf("[%s] %s[%d]: {", _get_log_level_string(LOG_LEVEL_DEBUG), label, len);
     for (uint16_t i = 0; i < len; i++)
     {
