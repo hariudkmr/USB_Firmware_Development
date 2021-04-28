@@ -31,7 +31,7 @@ static void process_standard_device_request()
 		case USB_STANDARD_GET_DESCRIPTOR:
 			log_info("Standard Get Descriptor request Received.");
 			const uint8_t descriptor_type = request->wValue >> 8;
-			const uint16_t descriptor_length = request->wLength;
+			const uint16_t descriptor_length = request->wLength;   //Difference Length
 
 			switch(descriptor_type)
 			{
@@ -78,6 +78,18 @@ static void process_control_transfer_stage()
 			break;
 
 		case USB_CONTROL_STAGE_DATA_IN:
+
+			log_info("Processing IN-DATA stage.");
+			uint8_t data_size = device_descriptor.bMaxPacketSize0;
+
+			usb_driver.write_packet(0, usbd_handle->ptr_in_buffer, data_size);
+			usbd_handle->in_data_size -= data_size;
+			usbd_handle->ptr_in_buffer += data_size;
+
+			usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_DATA_IN_IDLE;
+			break;
+
+		case USB_CONTROL_STAGE_DATA_IN_IDLE:
 			break;
 	}
 }
@@ -111,9 +123,21 @@ static void setup_data_received_handler(uint8_t endpointnumber, uint16_t byte_co
 
 }
 
+static void in_transfer_completed_handler(uint8_t endpoint_number)
+{
+
+}
+
+static void out_transfer_completed_handler(uint8_t endpoint_number)
+{
+
+}
+
 const UsbEvents usb_events = {
 		.on_usb_reset_received = &usb_reset_received_handler,
 		.on_setup_data_received = &setup_data_received_handler,
+		.on_in_transfer_completed=&in_transfer_completed_handler,
+		.on_out_transfer_completed=&out_transfer_completed_handler,
 		.on_usb_polled = &usb_polled_handler
 };
 

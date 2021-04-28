@@ -8,6 +8,7 @@
 #include "logger.h"
 #include "usb_driver.h"
 #include "usb_standards.h"
+#include "string.h"
 
 static void initialize_gpio_pins()
 {
@@ -373,6 +374,33 @@ static void rxflvl_handler()
 	}
 }
 
+static void inepint_handler()
+{
+	uint8_t endpoint_number = ffs(USB_OTG_FS_DEVICE->DAINT) - 1;
+	if(IN_ENDPOINT(endpoint_number)->DIEPINT & USB_OTG_DIEPINT_XFRC)
+	{
+		log_info("Transfer completed on IN Endpoint-%d",endpoint_number);
+		usb_events.on_in_transfer_completed(endpoint_number);
+
+		//Clear Interrupt Flag
+		SET_BIT(IN_ENDPOINT(endpoint_number)->DIEPINT,USB_OTG_DIEPINT_XFRC);
+	}
+}
+
+static void outepint_handler()
+{
+	uint8_t endpoint_number = ffs(USB_OTG_FS_DEVICE->DAINT >> 16) - 1;
+	if(OUT_ENDPOINT(endpoint_number)->DOEPINT & USB_OTG_DOEPINT_XFRC)
+	{
+		log_info("Transfer completed on out Endpoint-%d",endpoint_number);
+		usb_events.on_out_transfer_completed(endpoint_number);
+
+		//Clear Interrupt Flag
+		SET_BIT(OUT_ENDPOINT(endpoint_number)->DOEPINT, USB_OTG_DOEPINT_XFRC);
+	}
+}
+
+
 static void usbrst_handler()
 {
 	log_info("USB reset signal was detected");
@@ -408,11 +436,15 @@ static void gintsts_handler()
 	}
 	else if (gintsts & USB_OTG_GINTSTS_IEPINT)
 	{
-
+		inepint_handler();
+		// Clears the interrupt.
+		SET_BIT(USB_OTG_FS_GLOBAL->GINTSTS, USB_OTG_GINTSTS_IEPINT);
 	}
 	else if (gintsts & USB_OTG_GINTSTS_OEPINT)
 	{
-
+		outepint_handler();
+		// Clears the interrupt.
+		SET_BIT(USB_OTG_FS_GLOBAL->GINTSTS, USB_OTG_GINTSTS_OEPINT);
 	}
 
 	usb_events.on_usb_polled();
