@@ -5,8 +5,8 @@
  *      Author: hari
  */
 
-#ifndef USB_DRIVER_H_
-#define USB_DRIVER_H_
+#ifndef USBD_DRIVER_H_
+#define USBD_DRIVER_H_
 
 #include "stm32f4xx.h"
 #include "usb_standards.h"
@@ -60,4 +60,4 @@ extern const UsbEvents usb_events;
 /// \brief Total count of IN or OUT endpoints.
 #define ENDPOINT_COUNT 6
 
-#endif /* USB_DRIVER_H_ */
+#endif /* USBD_DRIVER_H_ */

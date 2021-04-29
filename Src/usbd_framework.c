@@ -4,13 +4,13 @@
  *  Created on: 23 Apr 2021
  *      Author: hari
  */
-#include "usb_framework.h"
+#include "usbd_framework.h"
 
 #include "math.h"
 #include "stddef.h"
-#include "usb_description.h"
 #include "usb_device.h"
-#include "usb_driver.h"
+#include "usbd_descriptors.h"
+#include "usbd_driver.h"
 
 static UsbDevice *usbd_handle;
 

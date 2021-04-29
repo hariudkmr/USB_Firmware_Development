@@ -17,10 +17,9 @@
  ******************************************************************************
  */
 
-#include <usb_framework.h>
-
 #include "logger.h"
 #include "usb_device.h"
+#include "usbd_framework.h"
 
 UsbDevice usb_device;
 uint32_t buffer[8];

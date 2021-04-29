@@ -5,8 +5,8 @@
  *      Author: uidn9556
  */
 
-#ifndef USB_DESCRIPTION_H_
-#define USB_DESCRIPTION_H_
+#ifndef USBD_DESCRIPTORS_H_
+#define USBD_DESCRIPTORS_H_
 
 #include "usb_standards.h"
 
@@ -27,4 +27,4 @@ const UsbDeviceDescriptor device_descriptor = {
 		.bNumConfigurations	= 1
 };
 
-#endif /* USB_DESCRIPTION_H_ */
+#endif /* USBD_DESCRIPTORS_H_ */
