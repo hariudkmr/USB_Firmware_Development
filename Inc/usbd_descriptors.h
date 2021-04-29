@@ -12,8 +12,8 @@
 
 const UsbDeviceDescriptor device_descriptor = {
 		.bLength 			= sizeof(UsbDeviceDescriptor),
-		.bDescriptorType 		= USB_DESCRIPTOR_TYPE_DEVICE,
-		.bcdUSB 			= 0x200,
+		.bDescriptorType 	= USB_DESCRIPTOR_TYPE_DEVICE,
+		.bcdUSB 			= 0x0200,
 		.bDeviceClass 		= USB_CLASS_PER_INTERFACE,
 		.bDeviceSubClass	= USB_SUBCLASS_NONE,
 		.bDeviceProtocol	= USB_PROTOCOL_NONE,
@@ -24,7 +24,7 @@ const UsbDeviceDescriptor device_descriptor = {
 		.iManufacturer		= 0,
 		.iProduct			= 0,
 		.iSerialNumber		= 0,
-		.bNumConfigurations	= 1
+		.bNumConfigurations	= 1,
 };
 
 #endif /* USBD_DESCRIPTORS_H_ */

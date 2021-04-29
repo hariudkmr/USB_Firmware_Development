@@ -6,6 +6,7 @@
  */
 
 #include <usbd_driver.h>
+
 #include "logger.h"
 #include "string.h"
 #include "usb_standards.h"
@@ -61,6 +62,11 @@ static void initialize_core() {
   SET_BIT(USB_OTG_FS_DEVICE->DIEPMSK, USB_OTG_DIEPMSK_XFRCM);
 }
 
+static void set_device_address(uint8_t address) {
+  MODIFY_REG(USB_OTG_FS_DEVICE->DCFG, USB_OTG_DCFG_DAD,
+             _VAL2FLD(USB_OTG_DCFG_DAD, address));
+}
+
 /** \brief Connects the USB device to the bus.
  */
 static void connect() {
@@ -79,11 +85,6 @@ static void disconnect() {
 
   // Powers the transceivers off.
   CLEAR_BIT(USB_OTG_FS->GCCFG, USB_OTG_GCCFG_PWRDWN);
-}
-
-static void set_device_address(uint8_t address) {
-  MODIFY_REG(USB_OTG_FS_DEVICE->DCFG, USB_OTG_DCFG_DAD,
-             _VAL2FLD(USB_OTG_DCFG_DAD, address));
 }
 
 /** \brief Pops data from the RxFIFO and stores it in the buffer.
@@ -303,6 +304,13 @@ static void deconfigure_endpoint(uint8_t endpoint_number) {
   flush_rxfifo();
 }
 
+static void usbrst_handler() {
+  log_info("USB reset signal was detected");
+  for (uint8_t i = 0; i <= ENDPOINT_COUNT; i++) {
+    deconfigure_endpoint(i);
+  }
+}
+
 static void enumdne_handler() {
   log_info("USB device speed enumeration done.");
   configure_endpoint0(8);
@@ -357,13 +365,6 @@ static void outepint_handler() {
 
     // Clear Interrupt Flag
     SET_BIT(OUT_ENDPOINT(endpoint_number)->DOEPINT, USB_OTG_DOEPINT_XFRC);
-  }
-}
-
-static void usbrst_handler() {
-  log_info("USB reset signal was detected");
-  for (uint8_t i = 0; i <= ENDPOINT_COUNT; i++) {
-    deconfigure_endpoint(i);
   }
 }
 
