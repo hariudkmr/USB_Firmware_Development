@@ -18,3 +18,22 @@ Renaming variable shortcut --> alt+shift+r
  a label can only be part of a statement and a declaration is not a statement
    declaration below switch label --> causes error
    can be resolved using a semicolon or any other executable statement
+   
+   
+1. Understand the Interrupt/Status Flags
+2. Upon USB Reset Flag
+	Device State Setup to Default
+	Device Parameter(In/Out Size, ConfigurationValue) configured with reset values
+	Control Transfer State set to Setup Stage
+3. Enumeration Done Flag --> This Takecare of the USB Phy Layer -after negotiating the Device Speed
+	1. Endpoint 0 is configured with RX Fifo set to 64 Size and Tx Fifo Set to 8 bytes
+	2. Need to Understand the Address Calculation in STM Controller
+4. Check for the RX Not Empty Flag - Trigger Receive Interrupt Handler
+	1. Check the OTG Global Status Register and Pop the Value
+		1. This Regiter Determines the curret packet Received
+		2. And the Endpoint where the payload is stored
+		3. After getting the Endpoint number from the Status Register, Read the USB Standard Request in RX FIFO
+	2. USB Framework for Setup Packet Received function is Triggered
+		1. Analyze the USB Standard Request and Determine Different Parameters
+		
+	   

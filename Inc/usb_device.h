@@ -8,6 +8,7 @@
 #ifndef USB_DEVICE_H_
 #define USB_DEVICE_H_
 
+#include "usb_standards.h"
 typedef struct
 {
 	/// \brief The current USB device state.
