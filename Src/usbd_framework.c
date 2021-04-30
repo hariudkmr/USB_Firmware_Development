@@ -34,6 +34,7 @@ static void usb_reset_received_handler() {
 
 static void process_standard_device_request() {
   UsbRequest const *request = usbd_handle->ptr_out_buffer;
+  uint16_t device_address;
 
   switch (request->bRequest) {
     case USB_STANDARD_GET_DESCRIPTOR:
@@ -54,8 +55,9 @@ static void process_standard_device_request() {
       break;
     case USB_STANDARD_SET_ADDRESS:
       log_info("Standard Set Address Request Received");
-      const uint16_t device_address = request->wValue;
+      device_address = request->wValue;
       usb_driver.set_device_address(device_address);
+
       usbd_handle->device_state = USB_DEVICE_STATE_ADDRESSED;
       log_info("Switching control transfer stage to IN-Status");
       usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_STATUS_IN;
@@ -120,11 +122,13 @@ static void process_control_transfer_stage() {
       usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_SETUP;
       break;
 
-    case USB_CONTROL_STAGE_DATA_IN_ZERO:
-      break;
     case USB_CONTROL_STAGE_STATUS_IN:
       usb_driver.write_packet(0, NULL, 0);
+      log_info("Switching control transfer stage to SETUP.");
       usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_SETUP;
+      break;
+
+    case USB_CONTROL_STAGE_DATA_IN_ZERO:
       break;
   }
 }
@@ -156,6 +160,6 @@ static void setup_data_received_handler(uint8_t endpointnumber,
 UsbEvents usb_events = {
     .on_usb_reset_received = &usb_reset_received_handler,
     .on_setup_data_received = &setup_data_received_handler,
+    .on_usb_polled = &usb_polled_handler,
     .on_in_transfer_completed = &in_transfer_completed_handler,
-    .on_out_transfer_completed = &out_transfer_completed_handler,
-    .on_usb_polled = &usb_polled_handler};
+    .on_out_transfer_completed = &out_transfer_completed_handler};

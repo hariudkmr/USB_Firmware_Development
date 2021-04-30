@@ -272,7 +272,7 @@ static void deconfigure_endpoint(uint8_t endpoint_number) {
   USB_OTG_INEndpointTypeDef *in_endpoint = IN_ENDPOINT(endpoint_number);
   USB_OTG_OUTEndpointTypeDef *out_endpoint = OUT_ENDPOINT(endpoint_number);
 
-  // Masks all interrupts of the targeted IN and OUT endpoints.
+  // Disable all interrupts of the targeted IN and OUT endpoints.
   CLEAR_BIT(USB_OTG_FS_DEVICE->DAINTMSK,
             (1 << endpoint_number) | (1 << 16 << endpoint_number));
 
@@ -309,6 +309,7 @@ static void usbrst_handler() {
   for (uint8_t i = 0; i <= ENDPOINT_COUNT; i++) {
     deconfigure_endpoint(i);
   }
+  usb_events.on_usb_reset_received();
 }
 
 static void enumdne_handler() {
@@ -342,6 +343,8 @@ static void rxflvl_handler() {
       break;
 
     case 0x03:  // OUT transfer has completed.
+      SET_BIT(OUT_ENDPOINT(endpoint_number)->DOEPCTL,
+              USB_OTG_DOEPCTL_CNAK | USB_OTG_DOEPCTL_EPENA);
       break;
   }
 }
