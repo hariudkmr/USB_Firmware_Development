@@ -175,4 +175,60 @@ typedef struct {
                                  supported by the USB device.*/
 } __attribute__((__packed__)) UsbDeviceDescriptor;
 
+/** \brief USB configuration descriptor. */
+typedef struct {
+  uint8_t bLength;         /**<\brief Size of the descriptor (in bytes).*/
+  uint8_t bDescriptorType; /**<\brief \ref USB_DESCRIPTOR_TYPE_CONFIGURATION
+                              descriptor.*/
+  uint16_t
+      wTotalLength; /**<\brief Size of the configuration descriptor header, and
+                       all sub descriptors attached to the configuration.*/
+  uint8_t bNumInterfaces;      /**<\brief Total number of interfaces in the
+                                  configuration.*/
+  uint8_t bConfigurationValue; /**<\brief Configuration index of the current
+                                  configuration descriptor.*/
+  uint8_t iConfiguration; /**<\brief Index of a string descriptor describing
+                             this configuration.*/
+  uint8_t bmAttributes;   /**<\brief Configuration attributes: Self Powered and
+                             Remote Wake up.*/
+  uint8_t bMaxPower;      /**<\brief Maximum power consumption of the device.*/
+} __attribute__((__packed__)) UsbConfigurationDescriptor;
+
+/**\brief USB interface descriptor. */
+typedef struct {
+  uint8_t bLength;           /**<\brief Size of the descriptor, in bytes. */
+  uint8_t bDescriptorType;   /**<\brief Interface descriptor. */
+  uint8_t bInterfaceNumber;  /**<\brief Index of the interface in the current
+                                configuration. */
+  uint8_t bAlternateSetting; /**<\brief Alternate setting for the interface
+                                number. */
+  uint8_t
+      bNumEndpoints; /**<\brief Total number of endpoints in the interface. */
+  uint8_t bInterfaceClass;    /**<\brief Interface class ID. */
+  uint8_t bInterfaceSubClass; /**<\brief Interface subclass ID.*/
+  uint8_t bInterfaceProtocol; /**<\brief Interface protocol ID. */
+  uint8_t iInterface; /**<\brief Index of the string descriptor describing the
+                         interface. */
+} __attribute__((__packed__)) UsbInterfaceDescriptor;
+
+/**\brief USB endpoint descriptor. */
+typedef struct {
+  uint8_t bLength;          /**<\brief Size of the descriptor, in bytes. */
+  uint8_t bDescriptorType;  /**<\brief Endpoint descriptor. */
+  uint8_t bEndpointAddress; /**<\brief Logical address of the endpoint including
+                               direction mask. */
+  uint8_t bmAttributes;     /**<\brief Endpoint attributes, \ref
+                               USB_ENDPOINT_BMATTRIBUTES_TYPE. */
+  uint16_t wMaxPacketSize;  /**<\brief Maximum packet size of the endpoint */
+  uint8_t bInterval; /**<\brief Polling interval of the endpoint (frames). */
+} __attribute__((__packed__)) UsbEndpointDescriptor;
+
+/** \anchor USB_ENDPOINT_BMATTRIBUTES_TYPE
+ * @{ */
+#define USB_ENDPOINT_TYPE_CONTROL 0x00    /**<\brief Control endpoint.*/
+#define USB_ENDPOINT_TYPE_ISOCHRONUS 0x01 /**<\brief Isochronous endpoint.*/
+#define USB_ENDPOINT_TYPE_BULK 0x02       /**<\brief Bulk endpoint.*/
+#define USB_ENDPOINT_TYPE_INTERRUPT 0x03  /**<\brief Interrupt endpoint.*/
+/** @} */
+
 #endif /* USB_STANDARDS_H_ */

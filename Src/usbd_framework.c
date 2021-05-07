@@ -32,6 +32,23 @@ static void usb_reset_received_handler() {
   usb_driver.set_device_address(0);
 }
 
+void usbd_configure() {
+  usb_driver.configure_in_endpoint(
+      (configuration_descriptor_combination.usb_mouse_endpoint_descriptor
+           .bEndpointAddress &
+       0x0F),
+      (configuration_descriptor_combination.usb_mouse_endpoint_descriptor
+           .bmAttributes &
+       0x03),
+      configuration_descriptor_combination.usb_mouse_endpoint_descriptor
+          .wMaxPacketSize);
+
+  usb_driver.write_packet((configuration_descriptor_combination
+                               .usb_mouse_endpoint_descriptor.bEndpointAddress &
+                           0x0F),
+                          NULL, 0);
+}
+
 static void process_standard_device_request() {
   UsbRequest const *request = usbd_handle->ptr_out_buffer;
   uint16_t device_address;
@@ -51,6 +68,14 @@ static void process_standard_device_request() {
           log_info("Switching control state to IN Data");
           usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_DATA_IN;
           break;
+
+        case USB_DESCRIPTOR_TYPE_CONFIGURATION:
+          log_info("- Get Configuration Descriptor.");
+          usbd_handle->ptr_in_buffer = &configuration_descriptor_combination;
+          usbd_handle->in_data_size = descriptor_length;
+          log_info("Switching control transfer stage to IN-DATA.");
+          usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_DATA_IN;
+          break;
       }
       break;
     case USB_STANDARD_SET_ADDRESS:
@@ -61,6 +86,40 @@ static void process_standard_device_request() {
       usbd_handle->device_state = USB_DEVICE_STATE_ADDRESSED;
       log_info("Switching control transfer stage to IN-Status");
       usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_STATUS_IN;
+      break;
+
+    case USB_STANDARD_SET_CONFIG:
+      log_info("Standard Set Configuration request received.");
+      usbd_handle->configuration_value = request->wValue;
+      usbd_configure();
+      usbd_handle->device_state = USB_DEVICE_STATE_CONFIGURED;
+      log_info("Switching control transfer stage to IN-STATUS.");
+      usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_STATUS_IN;
+      break;
+  }
+}
+
+static void process_class_interface_request() {
+  UsbRequest const *request = usbd_handle->ptr_out_buffer;
+
+  switch (request->bRequest) {
+    case USB_HID_SETIDLE:
+      log_info("Switching control transfer stage to IN-STATUS.");
+      usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_STATUS_IN;
+      break;
+  }
+}
+
+static void process_standard_interface_request() {
+  UsbRequest const *request = usbd_handle->ptr_out_buffer;
+
+  switch (request->wValue >> 8) {
+    case USB_DESCRIPTOR_TYPE_HID_REPORT:
+      usbd_handle->ptr_in_buffer = &hid_report_descriptor;
+      usbd_handle->in_data_size = sizeof(hid_report_descriptor);
+
+      log_info("Switching control transfer stage to IN-STATUS.");
+      usbd_handle->control_transfer_stage = USB_CONTROL_STAGE_DATA_IN;
       break;
   }
 }
@@ -77,12 +136,12 @@ static void process_request() {
 
     case USB_BM_REQUEST_TYPE_TYPE_CLASS |
         USB_BM_REQUEST_TYPE_RECIPIENT_INTERFACE:
-      // process_class_interface_request();
+      process_class_interface_request();
       break;
 
     case USB_BM_REQUEST_TYPE_TYPE_STANDARD |
         USB_BM_REQUEST_TYPE_RECIPIENT_INTERFACE:
-      // process_standard_interface_request();
+      process_standard_interface_request();
       break;
   }
 }
